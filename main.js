@@ -1,5 +1,6 @@
-import createElement from "./vdom/createElement.js";
-import render from "./vdom/render.js";
+import createElement from "./vdom/createElement.js"
+import render from "./vdom/render.js"
+import mount from "./vdom/mount.js"
 
 // createElement 함수를 통해 가상 DOM 생성
 const vApp = createElement('div', {
@@ -23,3 +24,5 @@ console.log($app);
 //    this is textNode
 //    <img src="https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif">
 //  </div>
+
+mount($app, document.getElementById('app'))

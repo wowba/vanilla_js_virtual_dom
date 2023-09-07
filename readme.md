@@ -82,6 +82,7 @@ const renderElem = vNode => {
   return $el
 }
 
+// render 함수는 가상 DOM을 인자로 받으며, 해당 노드에 따라 반환하는 element가 다르다.
 const render = vNode => {
   // 만약 가상 DOM이 단순히 text라면 createTextNode를 이용해 반환
   if (typeof vNode === 'string') {
@@ -95,12 +96,43 @@ const render = vNode => {
 export default render
 ```
 
-지금까지 구현한 createElement, render 함수를 이용하면 다음과 같은 코드를 작성할 수 있다.
-```javascript
-import createElement from "./vdom/createElement.js";
-import render from "./vdom/render.js";
+## mount
+createElement 함수로 가상 요소를 생성하고, render 함수로 가상 요소들을 html element로 변환했으니,
+다음은 mount 함수를 통해 html 요소를 실제 페이지에 올릴수 있어야 한다
 
-// createElement 함수를 통해 가상 DOM 생성
+```javascript
+// mount 함수는 replaceWith 메서드를 이용해 기존 요소를 가상돔을 통해 생성한 요소로 쉽게 변경 가능하다.
+// %replaceWith는 IE와 Safari에서는 동작하지 않는다.%
+const mount = ($node, $target) => {
+  $target.replaceWith($node)
+  return $node
+}
+
+export default mount
+```
+
+createElement, render, mount 세 함수를 이용하면 아래와 같이 html에 가상 DOM을 통해 요소를 추가할 수 있다!
+
+```html
+<!-- index.html --> 
+<html>
+  <head>
+    <title>Virtual DOM Study</title>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
+```
+```javascript
+// main.js
+import createElement from "./vdom/createElement.js"
+import render from "./vdom/render.js"
+import mount from "./vdom/mount.js"
+
+// createElement 함수를 통해 가상 요소 (Virtual Element) 생성
 const vApp = createElement('div', {
   attrs: {
     id: 'app',
@@ -115,6 +147,7 @@ const vApp = createElement('div', {
   ],
 });
 
+// render 함수를 통해 가상 요소를 실제 요소로 변환
 const $app = render(vApp);
 
 console.log($app);
@@ -122,4 +155,7 @@ console.log($app);
 //    this is textNode
 //    <img src="https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif">
 //  </div>
+
+// html에 만들어낸 실제 요소를 할당
+mount($app, document.getElementById('app'))
 ```

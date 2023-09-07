@@ -16,6 +16,7 @@ const renderElem = vNode => {
   return $el
 }
 
+// render 함수는 가상 DOM을 인자로 받으며, 해당 노드에 따라 반환하는 element가 다르다.
 const render = vNode => {
   // 만약 가상돔이 단순히 text라면 createTextNode를 이용해 반환
   if (typeof vNode === 'string') {
