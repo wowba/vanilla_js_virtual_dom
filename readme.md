@@ -33,11 +33,11 @@ const vApp = {
 ```
 
 ## createElement
-대부분의 가상 DOM은 createElement 라는 함수를 가진다. (보통 h 라고 부른다.)  
+대부분의 경우 가상 DOM을 구현할 때 createElement 라는 함수를 가진다. (보통 h 라고 부른다.)  
 이 함수는 태그명과 속성, 자식들을 인자로 받아 가상 요소 (virtual element) 라는 데이터를 반환한다.
 
 ```javascript
-// vdom/createElement.js
+// ./vdom/createElement.js
 
 // 속성 혹은 자식이 없을 수 있으므로 비구조화 문법에 기본 값으로 빈 객체를 할당한다.
 const createElement = (tagName, { attrs = {}, children = {} } = {}) => {
@@ -54,4 +54,72 @@ const createElement = (tagName, { attrs = {}, children = {} } = {}) => {
 }
 
 export default createElement
+```
+
+## render
+createElement 함수를 통해 가상 DOM을 메모리에 저장할 수 있다면,  
+이제 render 함수를 통해 메모리에 저장한 가상 DOM 을 실제 DOM 으로 생성할 수 있다.
+
+실제 DOM 에는 총 8가지 node가 존재하지만, 이번 예제에서는 ElementNode, TextNode 두가지만 구현한다.
+```javascript
+// ./vdom/render.js
+
+// renderElem 함수는 가상 DOM을 인자로 받아 실제 요소로 변환하는 과정을 거친다.
+const renderElem = vNode => {
+  // 1. 가상 DOM의 tagName을 이용해 html 요소 생성 
+  const $el = document.createElement(vNode.tagName)
+
+  // 2. 가상 DOM의 속성을 Object.entries를 통해 [key, value]로 받아 html 요소에 할당
+  for (const [k, v] of Object.entries(vNode.attrs)) {
+    $el.setAttributes(k, v)
+  }
+
+  // 3. 가상 DOM의 자식 요소들을 재귀함수를 통해 html요소로 만들어 현재 요소에 할당.
+  for (const child of vNode.children) {
+    $el.appendChild(render(child))
+  }
+
+  return $el
+}
+
+const render = vNode => {
+  // 만약 가상 DOM이 단순히 text라면 createTextNode를 이용해 반환
+  if (typeof vNode === 'string') {
+    return document.createTextNode(vNode)
+  }
+
+  // 그 외의 경우 이번 예제에서는 전부 elementNode로 판단.
+  return renderElem(vNode)
+}
+
+export default render
+```
+
+지금까지 구현한 createElement, render 함수를 이용하면 다음과 같은 코드를 작성할 수 있다.
+```javascript
+import createElement from "./vdom/createElement.js";
+import render from "./vdom/render.js";
+
+// createElement 함수를 통해 가상 DOM 생성
+const vApp = createElement('div', {
+  attrs: {
+    id: 'app',
+  },
+  children: [
+    "this is textNode", // 가상 text => textNode
+    createElement('img', { // 가상 요소 => elementNode
+      attrs: {
+        src: 'https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif',
+      },
+    }),
+  ],
+});
+
+const $app = render(vApp);
+
+console.log($app);
+//  <div id="app">
+//    this is textNode
+//    <img src="https://media.giphy.com/media/cuPm4p4pClZVC/giphy.gif">
+//  </div>
 ```
